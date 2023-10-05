@@ -1,0 +1,51 @@
+server:
+  port: 8090
+
+management:
+  health:
+    circuitbreakers.enabled: true
+    bulkheads.enabled: true
+    ratelimiters.enabled: true
+  endpoint:
+    health:
+      show-details: always
+    endpoints:
+      web:
+        exposure:
+          include: '*'
+
+resilience4j.circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10 #10 request, por defecto son 100
+        failureRateThreshold: 20 # el umbral, tasa de fallas en porcentaje
+        waitDurationInOpenState: 10s # tiempo de espera el estado abierto en segundos
+        permittedNumberOfCallsInHalfOpenState: 5
+        slowCallRateThreshold: 50
+        slowCallDurationThreshold: 2s
+        #minimumNumberOfCalls: 10
+        registerHealthIndicator: true
+    instances:
+      api_datos:
+        baseConfig: default
+
+resilience4j.bulkhead:
+    instances:
+      orderService:
+        maxWaitDuration: 6s
+        maxConcurrentCalls: 5
+        registerHealthIndicator: true
+
+resilience4j.ratelimiter:
+  instances:
+    simpleRateLimit:
+      limitForPeriod: 2
+      limitRefreshPeriod: 15s
+      timeoutDuration: 5s
+      registerHealthIndicator: true
+      eventConsumerBufferSize: 100
+
+#resilience4j.timeLimiter:
+  #configs:
+    #defecto:
+      #timeDuration: 2s
